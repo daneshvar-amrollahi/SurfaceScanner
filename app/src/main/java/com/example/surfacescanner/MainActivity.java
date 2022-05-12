@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 Log.d(TAG, "onCreate: Initializing Sensor Services");
                 sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
 
-                accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+                accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
                 sensorManager.registerListener(
                         MainActivity.this,
                         accelerometer,
@@ -79,7 +79,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         dt = Math.min(dt, 0.16f);
 
         Log.d(TAG, "--- dt = " + dt);
+
+
         for(int i = 0; i < 3; ++i) {
+            if (sensorEvent.values[i] < 0.20)
+                continue;
             velocity[i] += ((sensorEvent.values[i] + prevAcceleration[i]) / 2.0f) * dt;
             position[i] += velocity[i] * dt;
         }
