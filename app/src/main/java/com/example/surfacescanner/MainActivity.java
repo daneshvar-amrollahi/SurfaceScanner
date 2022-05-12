@@ -83,7 +83,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
 
         for(int i = 0; i < 3; ++i) {
-            if (sensorEvent.values[i] < A_THRESHOLD)
+            if (Math.abs(sensorEvent.values[i]) < A_THRESHOLD)
                 continue;
             velocity[i] += ((sensorEvent.values[i] + prevAcceleration[i]) / 2.0f) * dt;
             position[i] += velocity[i] * dt;
