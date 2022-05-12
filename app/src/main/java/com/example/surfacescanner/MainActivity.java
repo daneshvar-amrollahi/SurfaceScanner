@@ -17,6 +17,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private static final String TAG = "MainActivity";
     private SensorManager sensorManager;
     Sensor accelerometer;
+    Sensor gyroscope;
 
     static float NS2S;
     static float[] prevAcceleration;
@@ -52,9 +53,16 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
 
                 accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
+                gyroscope = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
+
                 sensorManager.registerListener(
                         MainActivity.this,
                         accelerometer,
+                        SensorManager.SENSOR_DELAY_NORMAL
+                );
+                sensorManager.registerListener(
+                        MainActivity.this,
+                        gyroscope,
                         SensorManager.SENSOR_DELAY_NORMAL
                 );
 
@@ -70,30 +78,34 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
-        Log.d(TAG, "onSensorChanged:");
-        Log.d(TAG, "--- a(X, Y, Z) = (" + sensorEvent.values[0] + " , " +
-                sensorEvent.values[1] + ", " +
-                sensorEvent.values[2] + ")"
-        );
+        if (sensorEvent.sensor.getType() == Sensor.TYPE_LINEAR_ACCELERATION) {
+            Log.d(TAG, "onSensorChanged:");
+            Log.d(TAG, "--- a(X, Y, Z) = (" + sensorEvent.values[0] + " , " +
+                    sensorEvent.values[1] + ", " +
+                    sensorEvent.values[2] + ")"
+            );
+            float dt = (sensorEvent.timestamp - prevTimestamp) * NS2S;
+            dt = Math.min(dt, 0.16f);
 
-        float dt = (sensorEvent.timestamp - prevTimestamp) * NS2S;
-        dt = Math.min(dt, 0.16f);
-
-        Log.d(TAG, "--- dt = " + dt);
+            Log.d(TAG, "--- dt = " + dt);
 
 
-        for(int i = 0; i < 3; ++i) {
-            if (Math.abs(sensorEvent.values[i]) < A_THRESHOLD)
-                continue;
-            velocity[i] += ((sensorEvent.values[i] + prevAcceleration[i]) / 2.0f) * dt;
-            position[i] += velocity[i] * dt;
+            for (int i = 0; i < 3; ++i) {
+                if (Math.abs(sensorEvent.values[i]) < A_THRESHOLD)
+                    continue;
+                velocity[i] += ((sensorEvent.values[i] + prevAcceleration[i]) / 2.0f) * dt;
+                position[i] += velocity[i] * dt;
+            }
+
+            System.arraycopy(sensorEvent.values, 0, prevAcceleration, 0, 3);
+            prevTimestamp = sensorEvent.timestamp;
+            Log.d(TAG, "--- r(X, Y, Z) = (" + position[0] + ", " +
+                    position[1] + ", " +
+                    position[2] + ")"
+            );
         }
-
-        System.arraycopy(sensorEvent.values, 0, prevAcceleration, 0, 3);
-        prevTimestamp = sensorEvent.timestamp;
-        Log.d(TAG, "--- r(X, Y, Z) = (" + position[0] + ", " +
-                position[1] + ", " +
-                position[2] + ")"
-        );
+        else if (sensorEvent.sensor.getType() == Sensor.TYPE_GYROSCOPE) {
+            //Haj mahyar
+        }
     }
 }
