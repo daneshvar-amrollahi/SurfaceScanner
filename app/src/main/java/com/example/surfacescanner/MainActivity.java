@@ -25,7 +25,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     static float[] linearAcceleration;
     static float[] gravity;
     static long prevTimestamp;
-    static float[] last_values;
+    static float A_THRESHOLD;
     static {
         NS2S = 1.0f / 1000000000.0f;
         prevAcceleration = new float[]{0f, 0f, 0f};
@@ -33,6 +33,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         position = new float[]{0f, 0f, 0f};
         linearAcceleration = new float[]{0f, 0f, 0f};
         gravity = new float[]{0f, 0f, 0f};
+        A_THRESHOLD = 0.2f;
     }
 
     @Override
@@ -82,7 +83,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
 
         for(int i = 0; i < 3; ++i) {
-            if (sensorEvent.values[i] < 0.20)
+            if (sensorEvent.values[i] < A_THRESHOLD)
                 continue;
             velocity[i] += ((sensorEvent.values[i] + prevAcceleration[i]) / 2.0f) * dt;
             position[i] += velocity[i] * dt;
