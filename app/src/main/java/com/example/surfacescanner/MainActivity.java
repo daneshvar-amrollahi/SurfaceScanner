@@ -105,7 +105,16 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             );
         }
         else if (sensorEvent.sensor.getType() == Sensor.TYPE_GYROSCOPE) {
-            //Haj mahyar
+            float omegaX = sensorEvent.values[0];
+            float omegaY = sensorEvent.values[1];
+            float omegaZ = sensorEvent.values[2];
+            Log.d(TAG, "--- omega(X, Y, Z) = (" + omegaX + ", " +
+                    omegaY + ", " +
+                    omegaZ + ")"
+            );
+
+            // float omega = Math.sqrt(omegaX*omegaX + omegaY*omegaY + omegaZ*omegaZ);
+
         }
     }
 }
