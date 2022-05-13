@@ -50,10 +50,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         Button start = findViewById(R.id.start);
 
+        Button finish = findViewById(R.id.finish);
+
+
         start.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d(TAG, "Dokme ro zad!");
+                Log.d(TAG, "START PRESSED!");
 
                 Log.d(TAG, "onCreate: Initializing Sensor Services");
                 sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
@@ -75,6 +78,21 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 Log.d(TAG, "onCreate: Registered accelerometer listener");
             }
         });
+
+
+        finish.setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Log.d(TAG, "FINISH PRESSED!");
+                        sensorManager.unregisterListener(MainActivity.this, accelerometer);
+                        sensorManager.unregisterListener(MainActivity.this, gyroscope);
+
+
+                    }
+                }
+        );
+
     }
 
     public void handleGyroscope(SensorEvent sensorEvent) {
