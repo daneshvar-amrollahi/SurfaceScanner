@@ -7,7 +7,6 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.nfc.Tag;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -25,8 +24,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     static float[] position;
     static float[] linearAcceleration;
     static float[] gravity;
-    static long prevTimestamp;
-    static float A_THRESHOLD;
+    static long prevTimestampAcc;
+    static long prevTimeStampGyro;
+    static final float A_THRESHOLD;
+    static float[] prevOmega;
+    static float[] theta;
+    static final float AV_THRESHOLD;
     static {
         NS2S = 1.0f / 1000000000.0f;
         prevAcceleration = new float[]{0f, 0f, 0f};
@@ -35,6 +38,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         linearAcceleration = new float[]{0f, 0f, 0f};
         gravity = new float[]{0f, 0f, 0f};
         A_THRESHOLD = 0.2f;
+        prevOmega = new float[]{0f, 0f, 0f};
+        theta = new float[]{0f, 0f, 0f};
+        AV_THRESHOLD = 0.2f; //check later
     }
 
     @Override
@@ -79,12 +85,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
         if (sensorEvent.sensor.getType() == Sensor.TYPE_LINEAR_ACCELERATION) {
-            Log.d(TAG, "onSensorChanged:");
+            Log.d(TAG, "onAccelerometerChanged:");
             Log.d(TAG, "--- a(X, Y, Z) = (" + sensorEvent.values[0] + " , " +
                     sensorEvent.values[1] + ", " +
                     sensorEvent.values[2] + ")"
             );
-            float dt = (sensorEvent.timestamp - prevTimestamp) * NS2S;
+            float dt = (sensorEvent.timestamp - prevTimestampAcc) * NS2S;
             dt = Math.min(dt, 0.16f);
 
             Log.d(TAG, "--- dt = " + dt);
@@ -98,22 +104,42 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             }
 
             System.arraycopy(sensorEvent.values, 0, prevAcceleration, 0, 3);
-            prevTimestamp = sensorEvent.timestamp;
+            prevTimestampAcc = sensorEvent.timestamp;
             Log.d(TAG, "--- r(X, Y, Z) = (" + position[0] + ", " +
                     position[1] + ", " +
                     position[2] + ")"
             );
         }
         else if (sensorEvent.sensor.getType() == Sensor.TYPE_GYROSCOPE) {
+            Log.d(TAG, "onGyroscopeChanged:");
+
             float omegaX = sensorEvent.values[0];
             float omegaY = sensorEvent.values[1];
             float omegaZ = sensorEvent.values[2];
-            Log.d(TAG, "--- omega(X, Y, Z) = (" + omegaX + ", " +
+
+            Log.d(TAG, "--- omega(X, Y, Z) = (" + omegaX + " , " +
                     omegaY + ", " +
                     omegaZ + ")"
             );
+            float dt = (sensorEvent.timestamp - prevTimeStampGyro) * NS2S;
+            dt = Math.min(dt, 0.16f);
+            Log.d(TAG, "--- dt = " + dt);
 
-            // float omega = Math.sqrt(omegaX*omegaX + omegaY*omegaY + omegaZ*omegaZ);
+
+            float omega = (float)Math.sqrt(omegaX*omegaX + omegaY*omegaY + omegaZ*omegaZ);
+
+
+            for (int i = 0; i < 3; i++) {
+                if (Math.abs(omega) < AV_THRESHOLD)
+                    continue;
+                theta[i] += ((sensorEvent.values[i] + prevOmega[i]) / 2f) * dt;
+            }
+            System.arraycopy(sensorEvent.values, 0, prevOmega, 0, 3);
+            prevTimeStampGyro = sensorEvent.timestamp;
+            Log.d(TAG, "--- theta(X, Y, Z) = (" + theta[0] + ", " +
+                    theta[1] + ", " +
+                    theta[2] + ")"
+            );
 
         }
     }
