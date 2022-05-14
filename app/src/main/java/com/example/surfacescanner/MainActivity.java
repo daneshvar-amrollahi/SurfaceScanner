@@ -105,16 +105,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                         Log.d(TAG, "FINISH PRESSED!");
                         sensorManager.unregisterListener(MainActivity.this, accelerometer);
                         sensorManager.unregisterListener(MainActivity.this, gyroscope);
-                        // createScatterPlot();
-                        GraphView graph = (GraphView) findViewById(R.id.graph);
-                        LineGraphSeries<DataPoint> series = new LineGraphSeries<DataPoint>(new DataPoint[] {
-                                new DataPoint(0, 1),
-                                new DataPoint(1, 5),
-                                new DataPoint(2, 3),
-                                new DataPoint(3, 2),
-                                new DataPoint(4, 6)
-                        });
-                        graph.addSeries(series);
+                        createScatterPlot();
                     }
                 }
         );
@@ -125,84 +116,17 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     {
         Log.d(TAG, "Creating Scatter Plot");
 
-        // xyValueArray = sortArray(xyValueArray);
+        LineGraphSeries<DataPoint> series = new LineGraphSeries<DataPoint>();
+        g = (GraphView) findViewById(R.id.graph);
+
         for (int i = 0; i < xyValueArray.size(); i++) {
             double x = xyValueArray.get(i).getX();
             double y = xyValueArray.get(i).getY();
-            xySeries.appendData(new DataPoint(x, y), true, 1000);
+            series.appendData(new DataPoint(x, y), true, 1000);
         }
-
-        xySeries.setShape(PointsGraphSeries.Shape.RECTANGLE);
-        xySeries.setColor(Color.BLUE);
-        xySeries.setSize(20f);
-
-        //set Scrollable and Scaleable
-        g.getViewport().setScalable(true);
-        g.getViewport().setScalableY(true);
-        g.getViewport().setScrollable(true);
-        g.getViewport().setScrollableY(true);
-
-        //set manual x bounds
-        g.getViewport().setYAxisBoundsManual(true);
-        g.getViewport().setMaxY(150);
-        g.getViewport().setMinY(-150);
-
-        //set manual y bounds
-        g.getViewport().setXAxisBoundsManual(true);
-        g.getViewport().setMaxX(150);
-        g.getViewport().setMinX(-150);
-
-        g.addSeries(xySeries);
+        g.addSeries(series);
     }
 
-    private ArrayList<XYValue> sortArray(ArrayList<XYValue> array){
-        /*
-        //Sorts the xyValues in Ascending order to prepare them for the PointsGraphSeries<DataSet>
-         */
-        int factor = Integer.parseInt(String.valueOf(Math.round(Math.pow(array.size(),2))));
-        int m = array.size() - 1;
-        int count = 0;
-        Log.d(TAG, "sortArray: Sorting the XYArray.");
-
-
-        while (true) {
-            m--;
-            if (m <= 0) {
-                m = array.size() - 1;
-            }
-            Log.d(TAG, "sortArray: m = " + m);
-            try {
-                //print out the y entrys so we know what the order looks like
-                //Log.d(TAG, "sortArray: Order:");
-                //for(int n = 0;n < array.size();n++){
-                //Log.d(TAG, "sortArray: " + array.get(n).getY());
-                //}
-                double tempY = array.get(m - 1).getY();
-                double tempX = array.get(m - 1).getX();
-                if (tempX > array.get(m).getX()) {
-                    array.get(m - 1).setY(array.get(m).getY());
-                    array.get(m).setY(tempY);
-                    array.get(m - 1).setX(array.get(m).getX());
-                    array.get(m).setX(tempX);
-                } else if (tempX == array.get(m).getX()) {
-                    count++;
-                    Log.d(TAG, "sortArray: count = " + count);
-                } else if (array.get(m).getX() > array.get(m - 1).getX()) {
-                    count++;
-                    Log.d(TAG, "sortArray: count = " + count);
-                }
-                //break when factorial is done
-                if (count == factor) {
-                    break;
-                }
-            } catch (ArrayIndexOutOfBoundsException e) {
-                Log.e(TAG, "sortArray: ArrayIndexOutOfBoundsException. Need more than 1 data point to create Plot." +
-                        e.getMessage());
-                break;
-            }
-        }
-        return array;
-    }
 
     public void handleGyroscope(SensorEvent sensorEvent) {
         Log.d(TAG, "onGyroscopeChanged:");
@@ -264,7 +188,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         else if (sensorEvent.sensor.getType() == Sensor.TYPE_GYROSCOPE) {
             handleGyroscope(sensorEvent);
         }
-
         xyValueArray.add(new XYValue(position[0], position[2]));
     }
 }
