@@ -73,6 +73,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             public void onClick(View v) {
                 Log.d(TAG, "START PRESSED!");
 
+                xyValueArray.clear();
+
                 Log.d(TAG, "onCreate: Initializing Sensor Services");
 
                 xySeries = new PointsGraphSeries<>();
@@ -118,11 +120,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         LineGraphSeries<DataPoint> series = new LineGraphSeries<DataPoint>();
         g = (GraphView) findViewById(R.id.graph);
-
         for (int i = 0; i < xyValueArray.size(); i++) {
             double x = xyValueArray.get(i).getX();
             double y = xyValueArray.get(i).getY();
-            series.appendData(new DataPoint(x, y), true, 1000);
+            series.appendData(new DataPoint(x, y), true, 100000);
         }
         g.addSeries(series);
     }
