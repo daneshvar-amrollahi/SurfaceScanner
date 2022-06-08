@@ -1,6 +1,6 @@
 # SurfaceScanner
 
-A simple android application to scan the surface for any ups and downs. You can run and build the project using android studio. This sensor uses your phone's accelerometer and gyroscope. 
+A simple android application to scan the surface for any ups and downs. You can run and build the project using android studio. The app uses your phone's accelerometer and gyroscope. 
 
 ## Usage
 
